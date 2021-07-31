@@ -1,0 +1,14 @@
+# Linux Basics
+- Get OS Details => `cat /etc/*release*`
+- Package management
+	- To install package on linux distro we generally use package manager such as `apt`, `rpm`, `yum`, `pacman`
+	- **`RPM` Red Hat Package Manager**
+		- It does not install any dependencies required by a package.
+		- Install a Package => `rpm -i telnet.rpm`
+		- Uninstall a Package => `rpm -e telnet.rpm`
+		- Query the database to get deatils about the package => `rpm -q telnet.rpm`
+	- **`YUM`** 
+		- YUM is a high level package manager that uses rpm underneath.
+		- It install all the dependencies required by a package.
+		- List YUM repos => `yum repolist`
+		- List packages => `yum list or yum list <package name>`

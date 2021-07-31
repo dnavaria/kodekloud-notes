@@ -1,0 +1,15 @@
+# VI Editor
+- Command mode => `:`
+- Insert mode => `i`
+- Insert mode to command mode  => `esc key`
+- Move around the editor => `arrow keys or khjl`
+- Deleting character => `x`
+- Delete entire line => `dd`
+- Copy a line => `yy`
+- Paste line => `p`
+- Scroll Up/Down => `ctrl+u or ctrl+d`
+- Write File => `:w or :w <file name>` 
+- Quit => `:q`
+- Write and uit => `:wq`
+- Find => `/<character or word>`
+	- Move the cursor to next occurences => `n`
