@@ -41,6 +41,7 @@ Restart=always
 WantedBy=multi-user.target 
 ```
 # Virtual Box & Networking Basics
+- To list and modify interfaces on the host => `ip link`
 - IP show => `ip addr show`
 - Set IP => `ip addr add <ip address>/<subnet mask> <name> <adapter name>` 
 - Show routing table  =>  `route`
@@ -50,4 +51,5 @@ WantedBy=multi-user.target
 - Enable IP forward => `cat /proc/sys/net/ipv4/ip_forward` 
 	- If it shows 1 then ip forward in enbled else change it to 1 to enable it 
 		- `echo 1 > /proc/sys/net/ipv4/ip_forward`
-		- 
+	- To make the changes permanent
+		- Edit `/etc/sysctl.conf`, add `net.ipv4.ip_forward=1`
