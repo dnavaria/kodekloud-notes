@@ -108,7 +108,7 @@ WantedBy=multi-user.target
 	- Gevent
 	- Twisted Web
 - `sudo sed -i 's/8080/5000/g' app.py; python app.py`
-# NodeJS
+## NodeJS
 - PM2 Production process manager
 - Install pm2 => `sudo npm install pm2@latest -g`
 - Start Single Instance of app => `sudo pm2 start <app name>.js`
@@ -116,12 +116,38 @@ WantedBy=multi-user.target
 - Stop Node Process => `pm2 delete <app name>.js or pm2 stop id shown in pm2 ls command`
 # Databases
 ## MySQL
+- `sudo yum install mariadb-server`
+- `sudo yum install https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm`
+	- `sudo yum install mysql-community-server`
 - Install MySQL on centos => `yum install mysql-server`
 - Start MySQL server => `sudo service mysqld start`
 - Initially a temproary password is generated and is logged in the log file => `/var/log/mysqld.log`
+	- `sudo grep 'temporary password' /var/log/mysqld.log`
 - Login to mysql using that temproary password => `mysql -u root -p<temproary password>`
 - We are going to change that  temproary password now => `ALTER USER 'root'@'localhost' IDENTIFIED BY '<new password>';`
 - Creating a new user => `CREATE USER '<username>'@'<user ip>' IDENTIFIED BY '<new password>';`
 - Creating a new user with access from any machine => `CREATE USER '<username>'@'%' IDENTIFIED BY '<new password>';`
 - Giving Privileges => `GRANT <permission> ON <DB.TABLE> TO '<username>'@'<user ip>'`
+- `GRANT ALL PRIVILEGES ON kk_db.* TO 'kk_user'@'localhost';`
 - Giving Privileges to all tables in all databases  => `GRANT <permission> ON *.* TO '<username>'@'<user ip>'`
+# SSL/TLS Certificates
+- Generating certificates
+	- Generating private key => `openssl genrsa -out <keyname>.key 1024`
+	- Generating certificate using private key => `openssl rsa -in <keyname>.key -pubout > <certificate name>.pem`
+	- Certificate Signing requests => `openssl req -new -key <keyname>.key -out <name>.csr -sbj "/C=US/ST=CA/O=MyOrg, Inc./CN=<domain name>"`
+- Usually certificates with public key have `*.crt or *.pem` extension and the one with the private key have `*.key or *-key.pem`
+- `sudo openssl req -new -newkey rsa:2048 -nodes -keyout app01.key -out app01.csr`
+- Creating a self-signed certificate => `sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout app01.key -out app01.crt`
+- To test if server is using correct certificate or not run this command and check if it returns your certificate:
+	- `echo | openssl s_client -showcerts -servername app01.com -connect app01:443 2>/dev/null | openssl x509 -inform pem`
+# JSON Path
+- Json Path is a query language that when applied to a dataset, returns you subset of that dataset.
+- In json query we can replace the root element with `$`
+	- `$.car`
+- All results of json path query a encapsulated in an array
+- Querying a list => `$[0], $[3], or $[0,3] gets you 0th and 3rd element`	
+	- fetching elements based on some condition => `$[check if each item in array is > 40]`
+		- `check if` can be replaced by `?(<query>)` and `each item in the list` can be replaced by `@`  => `$[?( @ > 40)]`
+		- Other operators such as `@ == 40, @!= 40, @ in [x,y,z], @ nin [x,y,z]`
+- Query example
+	- `$.car.wheels[?(@.location == "rear-right")].model`
