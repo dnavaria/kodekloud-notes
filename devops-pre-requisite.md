@@ -7,7 +7,7 @@
 - **`RPM` Red Hat Package Manager**
 	- It does not install any dependencies required by a package.
 	- Install a Package => `rpm -i telnet.rpm`
-	- Uninstall a Package => `rpm -e telnet.rpm`
+	- Uninstall a Package => `rpm -e telnet.r****pm`
 	- Query the database to get deatils about the package => `rpm -q telnet.rpm`
 	- List packages => `rpm -qa`
 - **`YUM`** 
@@ -53,3 +53,75 @@ WantedBy=multi-user.target
 		- `echo 1 > /proc/sys/net/ipv4/ip_forward`
 	- To make the changes permanent
 		- Edit `/etc/sysctl.conf`, add `net.ipv4.ip_forward=1`
+- Record types in DNS server 
+	- `A` records => ipv4 is mapped to hostname in this record
+	- `AAAA` records => ipv6 is mapped to hostname in this record
+	- `CNAME` records => multiple aliases for the same application / hostname, hostname to hostname mapping
+- `dig/nslookup` dns server or nameserver ping command
+# Building & Compiling
+## Java
+- Stages
+	- Develop
+	- Compile
+	- Package
+	- Document
+- Build Tools for java
+	- Maven
+	- Gradle
+	- ANT 
+- Setting environment variable for java `export PATH=$PATH:/opt/jdk-13.0.2/bin` 
+- Bulding a jar file => `jar cf <name of jar file> <Classes/dependencies> ... `
+- Creating Documentation => `javadoc -d doc <.java file or class>`
+![[Pasted image 20210821153122.png]]
+
+### ANT
+- Create Documentation => `ant docs`
+- Compile and generate jar package using => `ant`
+### Maven
+- Compile and package => `cd /opt/maven/my-app/; sudo mvn package`
+- Run `java -cp <jar file name>`
+	
+# WebServer
+## Apache
+- Install apache web server => `sudo yum install -y httpd`
+- Check status => `service httpd status`
+- Allowing http trafic through firewall => `firewall-cmd --permanent --add-service=http`
+	- Or If using ufw or iptables search appropriate commands
+- Config File => `/etc/httpd/conf/httpd.conf`
+	- You can also create individual configuration file in the above directory and then import them in the httpd.conf
+	- `Include conf/<custom config file name>.conf`
+### Logs
+- Access logs => `/var/log/httpd/access_log`
+- Error logs => `/var/log/httpd/error_log`
+## Apache Tomcat
+- Used to deploy java based web application
+- Config File => `conf/server.xml`
+- Connecter Tag => Port forwarding, similar to proxy pass in nginx
+- webapps directory => application code should be in this directory
+- Creating web archive => `jar -cvf app.war *` or use maven or gradle
+	- Move app.war to webapps directory and start the server
+	- We can verify by tailing logs of catalina.out file present in the logs directory
+## Deploying Python App
+- Production grade servers for python application deployment
+	- Gunicorn
+	- uWSGI
+	- Gevent
+	- Twisted Web
+- `sudo sed -i 's/8080/5000/g' app.py; python app.py`
+# NodeJS
+- PM2 Production process manager
+- Install pm2 => `sudo npm install pm2@latest -g`
+- Start Single Instance of app => `sudo pm2 start <app name>.js`
+- Fork Process and start multiple instance => `sudo pm2 start <app name>.js -i 4`
+- Stop Node Process => `pm2 delete <app name>.js or pm2 stop id shown in pm2 ls command`
+# Databases
+## MySQL
+- Install MySQL on centos => `yum install mysql-server`
+- Start MySQL server => `sudo service mysqld start`
+- Initially a temproary password is generated and is logged in the log file => `/var/log/mysqld.log`
+- Login to mysql using that temproary password => `mysql -u root -p<temproary password>`
+- We are going to change that  temproary password now => `ALTER USER 'root'@'localhost' IDENTIFIED BY '<new password>';`
+- Creating a new user => `CREATE USER '<username>'@'<user ip>' IDENTIFIED BY '<new password>';`
+- Creating a new user with access from any machine => `CREATE USER '<username>'@'%' IDENTIFIED BY '<new password>';`
+- Giving Privileges => `GRANT <permission> ON <DB.TABLE> TO '<username>'@'<user ip>'`
+- Giving Privileges to all tables in all databases  => `GRANT <permission> ON *.* TO '<username>'@'<user ip>'`
