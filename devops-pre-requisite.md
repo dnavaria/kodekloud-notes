@@ -2,6 +2,7 @@
 ## Topics left
 - Vagrant explore
 - Get OS Details => `cat /etc/*release*`
+
 ## Package management
 - To install package on linux distro we generally use package manager such as `apt`, `rpm`, `yum`, `pacman`
 - **`RPM` Red Hat Package Manager**
@@ -18,6 +19,7 @@
 		- List duplicate packages from different repos => `yum --showduplicates list <package name>`
 	- Remove package => `yum remove ansible`
 	- Install specific version of a package => `yum install <package name>-version`
+
 ## Services
 - `service` command uses `systemctl` utilities underneath
 - Start a service => `systemctl start <service name>`
