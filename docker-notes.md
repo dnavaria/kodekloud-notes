@@ -41,14 +41,14 @@ ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run
 ## Docker run
 - Linking different containers using `--link`.
 - Link is a command line option which can be used to llink two containers together.
-- `docker run -d --name=vote -p 5000:80 --lionk redis:redis voting-app`
+- `docker run -d --name=vote -p 5000:80 --link redis:redis voting-app`
 - By defining a container with a name we can use that name to link that container with other containers.
 	- `--link` command creates an entry into the `/etc/hosts` directory with the hostname provided after `--link` command with an internal IP of the container.
 - Note that using links this way is deprecated and the support may be removed in future in docker.
-- This is because as we will see in some time advanced and newer conapets in docker swarm and network supports better wats of achieving what we just did here with links.
+- This is because as we will see in some time advanced and newer conapets in docker swarm and network supports better ways of achieving what we just did here with links.
 - In case if you want to build the docker image using docker compose file replace `image: <image_name>` with `build: <path to directory which contains docker file and code>` 
 ## Docker Compose Versions
-- We might see docker compose files in different fomrats at diferent places.
+- We might see docker compose files in different formats at diferent places.
 - Docker compose evolved over time and supports a lot more options that it did in the beginning.
 - The original version of Docker compose file knows as `version 1`.
 - This had a number of limitations for example if you wanted to deploy conatiners on a different network other that the default bridged network, there was not way specifying that in this portion of the file.
@@ -64,7 +64,7 @@ ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run
 - We basically do not need to use links in `version 2 `of docker compose.
 - You can simply get rid of all the links you mentioned in `version 1 `and convert the file to `version 2.`
 - Finally `version 2` also introduces a depends on feature if you wish to specify a startup order, for this we can add it depends on property to the voting application and indicate that it is dependent on some other container.
-- `Version 3` is similar to v`ersion 2`, in the structure meaning it has a version specification at the top and a services section under which you put all your services just like in `version 2` and make sure to specify the version number as 3 at the top.
+- `Version 3` is similar to `Version 2`, in the structure meaning it has a version specification at the top and a services section under which you put all your services just like in `version 2` and make sure to specify the version number as 3 at the top.
 - `Version 3 `comes with support for `docker swarm`.
 - There are some options that were removed and added to see details on those you could refer to.
 - To create a new property called networks at the roots level adjacent to the services in the docker compose file and add a map of networks we are planning to use.
@@ -95,3 +95,18 @@ networks:
 	 back-end:
 		   
 ```
+# Docker Engine
+- Docker Engine is simply referred to a host with Docker installed on it.
+- When you are installing docker you are actually installing three different competence.
+	- Docker daemon
+		- This is a background process the manages Docker objects such as the images, containers, volumes and networks.
+	- The REST API Server 
+		- This server is the API interface that programs can use to talk to the demon and provide instructions.
+		- We can create our own tools using this API.
+	- The Docker CLI
+		- This is that command line interface that we generally use.
+		- It uses the rest api to interact with the docker demon.
+		- Docker CLI need not be on the same host. It can be on another system like a laptop and can still work with a remote Docker Engine.
+			- Simply use the `-H` option on the dokcer command and specify the remote Docker engine address and the port `docker -H=remote-docker-engine:port`
+## How exactly applications are containerized in Docker?
+- Docker uses namespace to isolate workspace, process ids, networks, interprocess communication, mounts and Unix time sharing systems are created in their own namespace thereby providing isolation between containers.
