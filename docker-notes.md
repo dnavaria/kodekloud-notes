@@ -152,3 +152,50 @@ services:
 	- But there is a way to restrict the amount of CPU or memory a container can use Docker uses three groups or control groups to restrict the amount of hardware resources allocated to each container.
 	- This can be done by providing the `--cpu` option to the docker command, providing a value of `.5` will ensure that the container does not take up more than 50 percent of the host at any given time.
 	- The same goes with memory `--memory` limits the amount of memory the container can utilize.
+# Docker Storage
+## How docker stores data?
+- It creates this folder structure at `/var/lib/docker` 
+- we have multiple folders under it
+	- `aufs`
+	- `containers`
+		- All files related to container are stored under the container directory
+	- `image`
+		- All files related to images are stored under the container directory
+	- `volumes`
+## Layered architecture
+- When docker builds images it builds these in a layered architecture.
+- Each line of instruction in the docker file creates a new layer in the docker image with just the changes from the previous layer.
+- The layered architechture allows docker to reuse those layers and build new images faster.
+- `COPY-ON-WRITE`
+	- The image read being read only just means that the files in these layers will not be modified in the image itself so the image will remain the same all the time until you rebuild the image using the docker build command.
+## What happens when we get rid of the container?
+- All of the data that was stored in the container layer also gets deleted.
+## Persist Data
+- For example we are working with a database and we would like to preserve the data stored by database.
+	- We could add a persistent volume to the container 
+	- `docker volume <volume name>` => creating a volume
+		- This command creates a folder with volumne name specified in the command under the `/var/lib/docker` directory
+		- Then when we run the docker container using the docker run command we could mount this volume inside the docker container `read write layer` using the `-v <volume name or path to a directory on host>:<path to directory in container>` option
+	- There are two types of mount:
+		- volume mount
+			- it mounts the volume from the volume directory
+		- bind mount
+			- It mounts a directory from any location on the docker host
+	- `-v` is old style, we should use `--mount` as a prefered way as it is more verbose, so we have to specify each parameter in a key equals value format
+		- `docker run --mount type=bind,source=/<path>,target=/<path> <container name>`
+## Storage Drivers
+- Docker uses storage drivers to enable layered architecture
+	- Maintaining the layered architechture
+	- Creating a writable layer 
+	- Moving files across layers to enable copy and write
+- Common storage drivers:
+	- `AUFS`
+	- `ZFS`
+	- `BTRFS`
+	- `Device Mapper`
+	- `Overlay`
+	- `Overlay2`
+- The selection of the storage drivers depends on the underlying OS being used.
+- The default storage driver is `AUFS` whereas thsi storage drivers is not available on other operating ssytems like fedora or cent OS.
+- In that case device mapper may be a better option
+- Docker will choose the best storage driver available based on the operating system.
