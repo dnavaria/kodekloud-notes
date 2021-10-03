@@ -45,24 +45,24 @@ ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run
 - By defining a container with a name we can use that name to link that container with other containers.
 	- `--link` command creates an entry into the `/etc/hosts` directory with the hostname provided after `--link` command with an internal IP of the container.
 - Note that using links this way is deprecated and the support may be removed in future in docker.
-- This is because as we will see in some time advanced and newer conapets in docker swarm and network supports better ways of achieving what we just did here with links.
+- This is because as we will see in some time advanced and newer concpets in docker swarm and network supports better ways of achieving what we just did here with links.
 - In case if you want to build the docker image using docker compose file replace `image: <image_name>` with `build: <path to directory which contains docker file and code>` 
 ## Docker Compose Versions
 - We might see docker compose files in different formats at diferent places.
 - Docker compose evolved over time and supports a lot more options that it did in the beginning.
-- The original version of Docker compose file knows as `version 1`.
+- The original version of Docker compose file known as `version 1`.
 - This had a number of limitations for example if you wanted to deploy conatiners on a different network other that the default bridged network, there was not way specifying that in this portion of the file.
 - Also say you have a dependency or start or startup order of some kind for example your database container must come up first and only then should the voting application be started, there was no way you could specify that in the version of the docker compose file.
 - Support for these came in `version 2`, with `version 2` and up the format of the file also changed a little bit.
 - You no longer specify your stack information directly as you did before.
-- It is all encapsulated in the services section so create a property called services in the root of the fiel and then move all the services underneath that you will still use the same docker-compose up command to bring up your application stack but how does docker-compose knwo what version of the file you are using.
+- It is all encapsulated in the services section so create a property called `services` in the root of the file and then move all the services underneath that you will still use the same docker-compose up command to bring up your application stack but how does docker-compose know what version of the file you are using.
 - We are free to use the` v1, v2 or v3` depending on our needs.
 - For version 2 and up you must specify the version of docker-compose file you're intending to use by specifying the version at the top of the file.
-- Another difference is the networking, all the containers it runs using `v1 `to the default bridged network and then use links to enable communication.
+- Another difference is the networking, all the containers it runs using `v1` to the default bridged network and then use links to enable communication.
 - With `version 2 `docker compose automatically creates a dedicated bridged network for this application and then attaches all containers to that new network.
 - All containers are then able to communicated to each other using each others service name.
-- We basically do not need to use links in `version 2 `of docker compose.
-- You can simply get rid of all the links you mentioned in `version 1 `and convert the file to `version 2.`
+- We basically do not need to use links in `version 2` of docker compose.
+- You can simply get rid of all the links you mentioned in `version 1` and convert the file to `version 2.`
 - Finally `version 2` also introduces a depends on feature if you wish to specify a startup order, for this we can add it depends on property to the voting application and indicate that it is dependent on some other container.
 - `Version 3` is similar to `Version 2`, in the structure meaning it has a version specification at the top and a services section under which you put all your services just like in `version 2` and make sure to specify the version number as 3 at the top.
 - `Version 3 `comes with support for `docker swarm`.
@@ -95,18 +95,60 @@ networks:
 	 back-end:
 		   
 ```
+
+```
+version: "3"
+services:
+	redis:
+		image: redis
+	db:
+		image:  postgres: 9.4
+		environment:
+			POSTGRES_USER: postgres
+			POSTGRES_PASSWORD: postgres
+	vote:
+		image: voting-app
+		ports:
+			- 5000:80
+	worker:
+		image: worker-app
+	result:
+		image: result-app
+		ports:
+			- 5001:80
+```
 # Docker Engine
 - Docker Engine is simply referred to a host with Docker installed on it.
-- When you are installing docker you are actually installing three different competence.
-	- Docker daemon
+- When you are installing docker you are actually installing three different components.
+	- `Docker daemon`
 		- This is a background process the manages Docker objects such as the images, containers, volumes and networks.
-	- The REST API Server 
+	- The `REST API Server` 
 		- This server is the API interface that programs can use to talk to the demon and provide instructions.
 		- We can create our own tools using this API.
-	- The Docker CLI
+	- The `Docker CLI`
 		- This is that command line interface that we generally use.
 		- It uses the rest api to interact with the docker demon.
 		- Docker CLI need not be on the same host. It can be on another system like a laptop and can still work with a remote Docker Engine.
 			- Simply use the `-H` option on the dokcer command and specify the remote Docker engine address and the port `docker -H=remote-docker-engine:port`
 ## How exactly applications are containerized in Docker?
 - Docker uses namespace to isolate workspace, process ids, networks, interprocess communication, mounts and Unix time sharing systems are created in their own namespace thereby providing isolation between containers.
+- `Namespace - PID`
+	- Whenever a linux system boots up tit start with just one process with a process id of `1`.
+	- This is the root process and kicks off all the other process in the system by the time the system.
+	- By the time the system boots up completely we have a handful of processes running this can be seen by running the PS command to list all the running processes.
+	- The `process id` are uniqure and two processes cannot have the same `process id`.
+	- Now if we weere to create a container which is basically like a child sytem within the current system, the chlid system needs to think that it is an independent system on its own and it has its own set of processes originating from the root process with a `process id of 1`.
+	- But we know there is no hard isolation between the underlying container and the host, so the process running inside the container are in fact processes running on the underlying host and two process cannot have `process id 1`.
+	- This is where namespaces comes into play.
+	- With process id namespaces each process can have multiple process ids associated with it.
+	- For example when the process start in the container its actually just another set of processes on the base linux system and it gets the next available process id, however they also get another process id starting with `pid 1`in the container namespace which is only visible inside the container so the container thinks that it has its own root process tree and so it is an independent system.
+	- Let's say we ran an nginx server as a container, we know that the nginx container runs a nginx service.
+	- If we list all services inside the docker container we see that the nginx service running with a `process id 1` , if we list the services on the docker host we will see the same service but with a different process ID.
+	- That indicates that all process are infact running on the same host but separated into their own containers using namespace.
+	
+	## How much of the resources are dedicated to the host and the containers and how does docker manage and share the resources between the containers by default?
+	- Docker host and containers shares the same system resources such as CPU and memory.
+	- By default there is no restriction as to how much of a resouce a container can use and hence a container may end up utilizin all of the resources on the underlying host.
+	- But there is a way to restrict the amount of CPU or memory a container can use Docker uses three groups or control groups to restrict the amount of hardware resources allocated to each container.
+	- This can be done by providing the `--cpu` option to the docker command, providing a value of `.5` will ensure that the container does not take up more than 50 percent of the host at any given time.
+	- The same goes with memory `--memory` limits the amount of memory the container can utilize.
