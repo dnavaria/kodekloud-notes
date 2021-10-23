@@ -24,6 +24,9 @@
 - `docker run -e <env variable name>=<value> <image_name/container_name>` => set env variables in docker container
 - `docker inspect <container_name:container_id>` => check the env varible and other metadata
 - `docker run --entrypoint <entrypoint which is usually an executable>  <image_name> <parameter>` => setting entry point in docker run command
+- `docker network ls` => to list all networks
+- `docker network create --driver <host/bridge/none> --subnet <subnet/mask> <network name> ` => create a custom network
+
 # Docker Images 
 ```
 FROM Ubuntu
@@ -137,7 +140,7 @@ services:
 	- This is the root process and kicks off all the other process in the system by the time the system.
 	- By the time the system boots up completely we have a handful of processes running this can be seen by running the PS command to list all the running processes.
 	- The `process id` are uniqure and two processes cannot have the same `process id`.
-	- Now if we weere to create a container which is basically like a child sytem within the current system, the chlid system needs to think that it is an independent system on its own and it has its own set of processes originating from the root process with a `process id of 1`.
+	- Now if we were to create a container which is basically like a child sytem within the current system, the chlid system needs to think that it is an independent system on its own and it has its own set of processes originating from the root process with a `process id of 1`.
 	- But we know there is no hard isolation between the underlying container and the host, so the process running inside the container are in fact processes running on the underlying host and two process cannot have `process id 1`.
 	- This is where namespaces comes into play.
 	- With process id namespaces each process can have multiple process ids associated with it.
@@ -148,11 +151,11 @@ services:
 	
 	## How much of the resources are dedicated to the host and the containers and how does docker manage and share the resources between the containers by default?
 	- Docker host and containers shares the same system resources such as CPU and memory.
-	- By default there is no restriction as to how much of a resouce a container can use and hence a container may end up utilizin all of the resources on the underlying host.
+	- By default there is no restriction as to how much of a resouce a container can use and hence a container may end up utilizing all of the resources on the underlying host.
 	- But there is a way to restrict the amount of CPU or memory a container can use Docker uses three groups or control groups to restrict the amount of hardware resources allocated to each container.
 	- This can be done by providing the `--cpu` option to the docker command, providing a value of `.5` will ensure that the container does not take up more than 50 percent of the host at any given time.
 	- The same goes with memory `--memory` limits the amount of memory the container can utilize.
-# Docker Storage
+# Docker Storage [[docker-storage]]
 ## How docker stores data?
 - It creates this folder structure at `/var/lib/docker` 
 - we have multiple folders under it
@@ -170,7 +173,7 @@ services:
 	- The image read being read only just means that the files in these layers will not be modified in the image itself so the image will remain the same all the time until you rebuild the image using the docker build command.
 ## What happens when we get rid of the container?
 - All of the data that was stored in the container layer also gets deleted.
-## Persist Data
+## Persist Data 
 - For example we are working with a database and we would like to preserve the data stored by database.
 	- We could add a persistent volume to the container 
 	- `docker volume <volume name>` => creating a volume
@@ -183,7 +186,7 @@ services:
 			- It mounts a directory from any location on the docker host
 	- `-v` is old style, we should use `--mount` as a prefered way as it is more verbose, so we have to specify each parameter in a key equals value format
 		- `docker run --mount type=bind,source=/<path>,target=/<path> <container name>`
-## Storage Drivers
+## Storage Drivers [[docker-storage-drivers]]
 - Docker uses storage drivers to enable layered architecture
 	- Maintaining the layered architechture
 	- Creating a writable layer 
@@ -199,3 +202,93 @@ services:
 - The default storage driver is `AUFS` whereas thsi storage drivers is not available on other operating ssytems like fedora or cent OS.
 - In that case device mapper may be a better option
 - Docker will choose the best storage driver available based on the operating system.
+
+# Docker Networking
+- When we install docker it creates three networks automatically :
+	- **bridge**
+		- It is the default network a container gets attached to.
+		- If you would like to associate the container with any other network you specify  the network information using the network command line paramenter `docker run ubuntu`
+		- This network is a private intrernal network created by docker on the host.
+		- All containers attached to this network by default and they get an internal IP address usually in the range `172.17` series.
+		- The containers can access each other using this internal ip if required.
+		- To access any of these containers from the outside world map the ports of these containersto ports on the docker host.
+	- **none**
+		- `docker run ubuntu --network=none`
+		- The containers are not attached to any network and doesn't have any access to the external network or other containers.
+		- They run in an isolated network.
+	- **host**
+		- `docker run ubuntu --network=host`
+		- Another way to access the container externally is to associate the container to the host network.
+		- This takes out any network isolation between the docker hsot and the docker container.
+		- Meaning if we are going to run a web server on port 5000 in a web container it is automatically accessible on the same port externally without requiring any port mapping as the web container uses the hosts network.
+		- This would also mean that unline betfore you will now not be able to run multiple web containers on the same host on the same port as the ports are  now common to all containers in the host network.
+- By default docker only creates one internal bridge network.
+- We could create our own internal network using the command:
+
+```
+docker network create \
+	--driver bridge \
+	--subnet 182.18.0.0/16
+	custom-isolated-network
+``` 
+- Running `docker inspect <container name>` will show you metadata and in `NetworkSettings` section, we will see the type of driver used adn the ip and mac address.
+- Containers can reach each other using their names.
+- Docker has a built in DNS server that helps the containers to resolve each otherg the containers name.
+- Not that the built in DNS server always runs at address `127.0.0.11`.
+## How are the containers isolated within the host?
+- Docker uses network namespaces that creates a separate namespace for each container.
+- It then uses virtual ethernet pairs to connect containers together.
+
+# Docker Swarm
+- With Docker swarm we can now combine multiple docker machines toghether into a single cluster
+- Docker swarm will take care of distributing our services or our application instances into separate hosts for HA and for load balancing across different systems and hardware to setup a docker swarm.
+- To setup docker swarm we must have hosts or multiple hosts with docker installed on them.
+- Then we have to designate one host to be the swarm manager and others as workers.
+- Once we are done with that we will run `docker swarm init --advertise-addr <ip>`  command on the swarm manager 
+- This will initialize the swarm manager and the output will also provide the command to be run on the workers 
+- Join the worker nodes using 
+	- `docker swarm join --token <token output is given when you initialized the swarm manager > <swarm manager ip>`
+
+# Kubernetes
+- With docker we were able to run a single instance of an application using the docker cli by running the docker run command.
+- With kubernetes using the kubernetes cli known as kubectl, we can run a thousand instance of the same application with a single command.
+- Kubernetes can scale it up to two thousand with another command.
+- Kubernetes can be even configured to do this automatically so that instances and the infrastructure itself can scale up and down based on user load.
+- Kubernetes can upgrade these two thousand instances of the application in a rolling fashion on e at a time with a single command.
+- If something goes wrong it can help you roll back these images with a single command.
+- Kubernetes can help you test new features of your application by only upgrading a percentage of these instances through a b testing methods.
+- The kubernetes open architecture provides support for many different network and storage renders
+- Any network or storage brand that you can think of has a plugin for kubernetes.
+- Kubernetes provide a variety of authentication and authorization mechanisms all major cloud service providers have native support for kubernetes.
+
+## Kubernetes Architecture
+- It consists of a set of nodes generally a physical or virtual machine on which kubernetes is installed.
+- Node is a worker machine where the docker containers can be launched by kubernetes.
+- A cluster is a set of nodes grouped together this way even if one node fails, we have our application still accessible from the other nodes.
+- The master is a node with the kubernetes control plane components installed.
+- The master watches over the nodes in the cluster and is responsible for the actual orchestration of containers on the worker nodes.
+- When you install kubernetes on a system, you are actually installing the following components:
+	- **An API server**
+		- Acts as the front end for kubernetes 
+		- The users, management devices, cli interfaces all talk to api server to interact with component cluster
+	- **Etcd server**
+		- It is a distributed, reliable key-value store used by kubernetes to store all data used to manager the cluster
+		- When you have multiple nodes and multiple masters in your clusters etcd stores all that information in the cluster in a distributerd manner 
+		- It is responsible for implementing logs within the cluster to ensure there are no conflicts between the masters
+	- **kubelet**
+		- It is the agent that runs on each node in the cluster.
+		- The agent is responsible for making sure that the containers are running on the nodes as expected.
+	- **Container runtime**
+		- The container runtime is the underlying software that is used to run containers in our case it happens to be Docker
+	- **Controller**
+		- The controllers are the brain behind the orchestration
+		- They are responsible for noticcing and responding when nodes, containers or endpoints close down.
+		- The controllers makes decisions to bring up new containers in such cases
+    - **Scheduler**
+		- It is responsible for distributing work or containers across multiple nodes
+		- It looks for newly created containers and assigns them to nodes
+- **kubectl**
+	- It is the kubernetes cli which is used to deploy and manage applications on a kubernetes cluster to get cluster related information, status of the nodes in the cluster and other things.
+	- The `kubectl run hello-minikube`  command is used to deploy an application on the cluster
+	- The `kubectl cluster-info`  is used to view information about the cluster and
+	-  The `kubectl get nodes` command is used to list all the nodes part of the cluster.

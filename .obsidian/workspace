@@ -4,12 +4,12 @@
     "type": "split",
     "children": [
       {
-        "id": "4565d55fbbc40abc",
+        "id": "5011a4827b28ea6a",
         "type": "leaf",
         "state": {
           "type": "markdown",
           "state": {
-            "file": "devops-pre-requisite.md",
+            "file": "docker-notes.md",
             "mode": "source"
           }
         }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "devops-pre-requisite.md",
+                "file": "docker-notes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -87,9 +87,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "4565d55fbbc40abc",
+  "active": "5011a4827b28ea6a",
   "lastOpenFiles": [
+    "docker-notes.md",
     "Untitled.md",
-    "README.md"
+    "docker-storage.md",
+    "Untitled 1.md",
+    "docker_storage.md",
+    "devops-pre-requisite.md",
+    "docker_notes.md",
+    "linux-pre-requisite.md",
+    "vi-notes.md",
+    "git-notes.md"
   ]
 }
