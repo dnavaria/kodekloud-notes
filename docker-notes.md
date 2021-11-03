@@ -26,6 +26,7 @@
 - `docker run --entrypoint <entrypoint which is usually an executable>  <image_name> <parameter>` => setting entry point in docker run command
 - `docker network ls` => to list all networks
 - `docker network create --driver <host/bridge/none> --subnet <subnet/mask> <network name> ` => create a custom network
+- `docker system df -v` => to view the actual disk space used by the images and containers.
 
 # Docker Images 
 ```
@@ -152,6 +153,7 @@ services:
 	## How much of the resources are dedicated to the host and the containers and how does docker manage and share the resources between the containers by default?
 	- Docker host and containers shares the same system resources such as CPU and memory.
 	- By default there is no restriction as to how much of a resouce a container can use and hence a container may end up utilizing all of the resources on the underlying host.
+	- Docker uses cgroups or control groups to restrict the amount of hardware resources allocated to each container.
 	- But there is a way to restrict the amount of CPU or memory a container can use Docker uses three groups or control groups to restrict the amount of hardware resources allocated to each container.
 	- This can be done by providing the `--cpu` option to the docker command, providing a value of `.5` will ensure that the container does not take up more than 50 percent of the host at any given time.
 	- The same goes with memory `--memory` limits the amount of memory the container can utilize.
@@ -239,7 +241,7 @@ docker network create \
 - Docker uses network namespaces that creates a separate namespace for each container.
 - It then uses virtual ethernet pairs to connect containers together.
 
-# Docker Swarm
+# Docker Swarm [[docker-swarm]]
 - With Docker swarm we can now combine multiple docker machines toghether into a single cluster
 - Docker swarm will take care of distributing our services or our application instances into separate hosts for HA and for load balancing across different systems and hardware to setup a docker swarm.
 - To setup docker swarm we must have hosts or multiple hosts with docker installed on them.
@@ -254,9 +256,9 @@ docker network create \
 - With kubernetes using the kubernetes cli known as kubectl, we can run a thousand instance of the same application with a single command.
 - Kubernetes can scale it up to two thousand with another command.
 - Kubernetes can be even configured to do this automatically so that instances and the infrastructure itself can scale up and down based on user load.
-- Kubernetes can upgrade these two thousand instances of the application in a rolling fashion on e at a time with a single command.
+- Kubernetes can upgrade these two thousand instances of the application in a rolling fashion one at a time with a single command.
 - If something goes wrong it can help you roll back these images with a single command.
-- Kubernetes can help you test new features of your application by only upgrading a percentage of these instances through a b testing methods.
+- Kubernetes can help you test new features of your application by only upgrading a percentage of these instances through ab testing methods.
 - The kubernetes open architecture provides support for many different network and storage renders
 - Any network or storage brand that you can think of has a plugin for kubernetes.
 - Kubernetes provide a variety of authentication and authorization mechanisms all major cloud service providers have native support for kubernetes.
@@ -272,8 +274,8 @@ docker network create \
 		- Acts as the front end for kubernetes 
 		- The users, management devices, cli interfaces all talk to api server to interact with component cluster
 	- **Etcd server**
-		- It is a distributed, reliable key-value store used by kubernetes to store all data used to manager the cluster
-		- When you have multiple nodes and multiple masters in your clusters etcd stores all that information in the cluster in a distributerd manner 
+		- It is a distributed, reliable key-value store used by kubernetes to store all data used to manage the cluster
+		- When you have multiple nodes and multiple masters in your clusters etcd stores all that information in the cluster in a distributed manner 
 		- It is responsible for implementing logs within the cluster to ensure there are no conflicts between the masters
 	- **kubelet**
 		- It is the agent that runs on each node in the cluster.
@@ -282,7 +284,7 @@ docker network create \
 		- The container runtime is the underlying software that is used to run containers in our case it happens to be Docker
 	- **Controller**
 		- The controllers are the brain behind the orchestration
-		- They are responsible for noticcing and responding when nodes, containers or endpoints close down.
+		- They are responsible for noticing and responding when nodes, containers or endpoints close down.
 		- The controllers makes decisions to bring up new containers in such cases
     - **Scheduler**
 		- It is responsible for distributing work or containers across multiple nodes
