@@ -91,3 +91,16 @@
 - However there is no hard limit on the number of managern nodes you can add to a cluster, you can add as many nodes as you want and Docker will not stop you.
 - Quorum is the minimum number of manager to keep the cluster alive.
 - The reverse of that is the max number of ndoes that can fail will give us the fault tolerence.
+
+# Hands on notes
+- `docker node ls` => prints all the nodes in the cluster
+- `docker swarm leave` => make a node leave the cluster
+- `docker node rm <node name>` => to remove the node from the cluster
+- `docker swarm join-token manager` => to get a token, by using which we will be able to join cluster as manager
+- `docker swarm join-token worker` => to get a token, by using which we will be able to join cluster as worker
+- `docker node promote <node name>` => to promote a worker node to manager node 
+- `docker swarm init --force-new-cluster --advertise-addr <ip address>`
+-  
+- The master node can be identified by leader under the manager status 
+- The * after the node ID indicates the current system that you are on.
+- ``
