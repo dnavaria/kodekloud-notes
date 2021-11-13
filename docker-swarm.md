@@ -104,4 +104,37 @@
 -  
 - The master node can be identified by leader under the manager status 
 - The * after the node ID indicates the current system that you are on.
-- ``
+
+# Docker Service
+- `docker service update --help` => to view the update command options
+- They key componeny of swarm orchestration is docker service.
+- Docker service are one or more instances of a single application of a single application or a service that runs across the swarm cluster
+- `docker service create --replicas=<instance number> <image name>` => command to deploy docker container in docker swarm
+- Remember the docker service command must be run on the manager node not on the worker node
+- The docker service create command is similar to the docker run command in terms of the options passed such as the `-e environment variables`, `-p for publishing ports or port mapping` and the --network to attach the container to a particular network.
+
+## Working
+- When you run docker service create command to create `n` instances of an image, the orchestrator on the manager node decides how many tasks to create, and then the scheduler should use that many tasks on each worker node.
+- The task on the worker node is a process that kicks off the actual container instances.
+- The task has a one to one relationship with each container.
+- The task is responsible for updating the status of the container to the manager node, so the manager node can keep track of the workers and instances running on them.
+- In case the container was to fall, the task fails as well.
+- If a task fails, the manager node becomes aware of it and it automatically reschedules a new task to run a new container instance to replace the failed container.
+
+## Replicas vs Global
+- There are two types of services replicated and global:
+	- Replicas
+		- The services which are created with the `--replica` option with a predefined number of replicas
+	- Global
+		- `--mode global` instead of `--replica` 
+		- When you want one instance of a service placed on alll nodes in the cluster.
+		- A good example would be a monitoring agent
+
+## Container naming in docker swarm
+- If we don't specify a name while creating a container or a service, docker automatically generates a random funny name but you could use the name option to specify the name option to specify the name.
+- When we use this `docker run` command it created a service with the same name as we only had a single container.
+- But now that we have multiple instances of the container running, docker swarm automatically appends a number to the name on each container to avoid having the same name for all containers.
+
+## Update docker service
+- `docker service update --replicas=<new instance number> <image name>` => to update docker service
+- `docker node update --availability drain <swarm manager node name>`
