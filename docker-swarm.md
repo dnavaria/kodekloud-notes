@@ -139,3 +139,7 @@
 - `docker service update --replicas=<new instance number> <image name>` => to update docker service
 - `docker node update --availability drain <swarm manager node name>`
 - `docker service scale <container name>=<scale number>`
+
+## Docker Stacks [[docker-stacks]]
+- We can convert the docker service commands into a docker compose file.
+- Once we hajve that ready, we run that docker stack deploy, to deploy the entire application stack all at once.

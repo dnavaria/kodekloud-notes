@@ -205,7 +205,7 @@ services:
 - In that case device mapper may be a better option
 - Docker will choose the best storage driver available based on the operating system.
 
-# Docker Networking
+# Docker Networking [[docker-networks]]
 - When we install docker it creates three networks automatically :
 	- **bridge**
 		- It is the default network a container gets attached to.
