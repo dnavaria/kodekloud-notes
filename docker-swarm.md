@@ -138,3 +138,4 @@
 ## Update docker service
 - `docker service update --replicas=<new instance number> <image name>` => to update docker service
 - `docker node update --availability drain <swarm manager node name>`
+- `docker service scale <container name>=<scale number>`
